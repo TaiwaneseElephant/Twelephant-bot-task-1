@@ -107,7 +107,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
                     if saved:
                         return new_counter, last_list
                     else:
-                        return new_counter, last_list + archive_list[:max_sections_num]
+                        return new_counter, last_list + archive_list[:i]
             saved = save(site, archive_page, text, f"Archived {len(archive_list)} threads from [[{talk_page_name}]] by Twelephant-bot")
             if saved:
                 return counter, []
@@ -146,12 +146,13 @@ def update_counter(page_name:str, work_page_name:str, work_template_name:str, si
     else:
         work_page = pywikibot.Page(site, work_page_name)
         page_list = json.loads(work_page.text)
-        del page_list[page.title()]
+        if page.title() in page_list:
+            del page_list[page.title()]
     text = json.dumps(page_list, ensure_ascii = False, indent = 4, sort_keys = True)
     save(site, work_page, text, "Updated by Twelephant-bot")
 
 def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(counter)d", archive_time:int = 86400, counter:int = 1, minthreadsleft:int = 5, minthreadstoarchive:int = 2, \
-                 archiveheader:str = "{{talkarchive}}", maxarchivesize:list[int, str] = ["Bytes", 1000000000], work_page_name:str = "", work_template_name:str = "", **kwargs):
+                 archiveheader:str = "{{talkarchive}}", maxarchivesize:list[str, int] = ["Bytes", 1000000000], custom_rules:list[[str, int]] = [], work_page_name:str = "", work_template_name:str = "", **kwargs):
     talk_page = pywikibot.Page(site, page_name)
     timestripper = textlib.TimeStripper(site)
     sections = textlib.extract_sections(talk_page.text, site)
@@ -171,13 +172,26 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
         if mwparser.parse(content, skip_style_tags = True).filter_templates(matches = "Nosave"):
             continue
         if (signature_timestamp := find_signature_timestamp(content)):
+            title = sections.sections[i].title
+            custom_rules_used  = False
             fail = False
-            for j in signature_timestamp:
-                time_then = timestripper.timestripper(j).timetuple()
-                time_diff = time.time() - calendar.timegm(time_then)
-                if time_diff < archive_time:
-                    fail = True
-                    break
+            for rule, custom_time in custom_rules:
+                if re.match(rule, title):
+                    custom_rules_used  = True
+                    for j in signature_timestamp:
+                        time_then = timestripper.timestripper(j).timetuple()
+                        time_diff = time.time() - calendar.timegm(time_then)
+                        if time_diff < custom_time:
+                            fail = True
+                            break
+            if not custom_rules_used:
+                fail = False
+                for j in signature_timestamp:
+                    time_then = timestripper.timestripper(j).timetuple()
+                    time_diff = time.time() - calendar.timegm(time_then)
+                    if time_diff < archive_time:
+                        fail = True
+                        break
             if fail:
                 continue
             if date_used:
@@ -221,7 +235,7 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = False)
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : 86400, "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
-               "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}"}
+               "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
     for i in page_list:
         text = mwparser.parse(i.text, skip_style_tags = True)
         if denybots(text) or not (match := text.filter_templates(matches = work_template_name)):
@@ -241,7 +255,7 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                     result[title]["archive_page_name"] = f"{title}/{item}"
             elif key == "algo":
                 item = item.replace(" ", "")
-                if re.match(r"old\(\d*[wdh]\)", item):
+                if re.match(r"old\(\d+[wdh]\)", item):
                     var = {"w":604800, "d":86400, "h":3600}
                     result[title]["archive_time"]  = int(item[4:-2]) * var[item[-2]]
             elif key in ("counter", "minthreadsleft", "minthreadstoarchive"):
@@ -250,7 +264,7 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                     result[title][key] = int(item)
             elif key  == "maxarchivesize":
                 item = item.replace(" ", "")
-                if re.match(r"\d*[MKT]", item):
+                if re.match(r"\d+[MKT]", item):
                     if (num := int(item[:-1])) == 0:
                         continue
                     var1 = {"M":"Bytes", "K":"Bytes", "T":"Threads"}
@@ -258,10 +272,18 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                     result[title]["maxarchivesize"] = [var1[item[-1]], (num * var2[item[-1]])]
             elif key == "archiveheader":
                 result[title]["archiveheader"] = item
+            elif key.startswith("custom"):
+                if re.match(r".*?;\d+", item):
+                    var1 = re.match(r".*?;", item)
+                    var2 = re.match(r"\d+$", item)
+                    if var1 and var2:
+                        result[title]["custom_rules"].append([var1.group().rstrip(';'), int(var2.group())])
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
         if "%(counter)d" not in result[title]["archive_page_name"]:
             del result[title]["counter"], result[title]["maxarchivesize"]
+        if result[title]["custom_rules"] == []:
+            del result[title]["custom_rules"]
     work_page = pywikibot.Page(site, work_page_name)
     old_page_list = json.loads(work_page.text)
     if old_page_list != result:
@@ -297,9 +319,11 @@ if __name__ == "__main__":
     times_now = 0
     WORK_PAGE_NAME = "User:Twelephant-bot/Work page.json"
     WORK_TEMPLATE_NAME = "User:Twelephant-bot/Archive"
-    while times_now < times_limit and check_switch(SITE, "User:Twelephant-bot/setting.json"):
+    while times_now < times_limit:
         if times_now % 10 == 0:
             update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
+            if not check_switch(SITE, "User:Twelephant-bot/setting.json"):
+                break
         page_list = get_pages_to_archive(SITE, WORK_PAGE_NAME)
         for page, pref in page_list.items():
             try:
