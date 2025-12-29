@@ -232,6 +232,15 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             del_archived(site, talk_page, del_list, sections, [])
 
 def update_work_page(site, work_page_name:str, work_template_name:str):
+    def get_time(text):
+        item = text.replace(" ", "").lower()
+        match = re.match(r"old\((\d+)([wdh])\)", item)
+        var = {"w":604800, "d":86400, "h":3600}
+        if match:
+            var1, var2 = match.groups()
+            return int(var1) * var[var2]
+        else:
+            return None
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = False)
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : 86400, "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
@@ -254,10 +263,9 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                 else:
                     result[title]["archive_page_name"] = f"{title}/{item}"
             elif key == "algo":
-                item = item.replace(" ", "")
-                if re.match(r"old\(\d+[wdh]\)", item):
-                    var = {"w":604800, "d":86400, "h":3600}
-                    result[title]["archive_time"]  = int(item[4:-2]) * var[item[-2]]
+                var = get_time(item)
+                if var != None:
+                    result[title]["archive_time"]  = var
             elif key in ("counter", "minthreadsleft", "minthreadstoarchive"):
                 item = item.replace(" ", "")
                 if item.isdigit():
@@ -274,10 +282,12 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                 result[title]["archiveheader"] = item
             elif key.startswith("custom"):
                 if re.match(r".*?;\d+", item):
-                    var1 = re.match(r".*?;", item)
-                    var2 = re.match(r"\d+$", item)
-                    if var1 and var2:
-                        result[title]["custom_rules"].append([var1.group().rstrip(';'), int(var2.group())])
+                    var = re.match(r"(.*?);(\d+)$", item)
+                    if var:
+                        var1, var2 = var.groups()
+                        var3 = get_time(var2)
+                        if var3 != None:
+                            result[title]["custom_rules"].append([var1, var3])
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
         if "%(counter)d" not in result[title]["archive_page_name"]:
@@ -310,8 +320,11 @@ def welcome_newcomers(new_page_list:dict, old_page_list:dict, site):
             send_welcome_message(i, site)
 
 def check_switch(site, switch_page_name:str) -> bool:
-    switch_page = pywikibot.Page(site, switch_page_name)
-    return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
+    try:
+        switch_page = pywikibot.Page(site, switch_page_name)
+        return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
+    except:
+        return True
 
 if __name__ == "__main__":
     SITE = pywikibot.Site('wikipedia:zh')
