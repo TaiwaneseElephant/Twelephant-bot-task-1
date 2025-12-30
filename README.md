@@ -1,2 +1,3 @@
 # Twelephant-bot
-Source code of Twelephant-bot in zhwiki.
+Source code of Twelephant-bot.
+https://zh.wikipedia.org/wiki/User:Twelephant-bot
