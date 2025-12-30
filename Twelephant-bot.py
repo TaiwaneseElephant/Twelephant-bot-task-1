@@ -343,5 +343,5 @@ if __name__ == "__main__":
                 archive_page(page, site = SITE, work_page_name = WORK_PAGE_NAME, work_template_name = WORK_TEMPLATE_NAME, **pref)
             except  Exception as e:
                 print(f"Skipped page '{page}', its prefercence is {pref}, and the error is {e}")
-        time.sleep(60)
+        time.sleep(600)
         times_now += 1
