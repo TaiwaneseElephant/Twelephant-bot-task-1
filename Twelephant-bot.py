@@ -171,7 +171,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
         if len(del_list) == maxthreadstoarchive:
             break
         content = sections.sections[i].content
-        if mwparser.parse(content, skip_style_tags = True).filter_templates(matches = "Nosave"):
+        if "{{nosave}}" in content.lower():
             continue
         if (signature_timestamp := find_signature_timestamp(content)):
             title = sections.sections[i].title
@@ -262,21 +262,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                         header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list, sections, [])
 
-def update_work_page(site, work_page_name:str, work_template_name:str):
-    def get_time(text):
-        item = text.replace(" ", "").lower()
-        match1 = re.match(r"old\((\d+)([wdh])\)", item)
-        match2 =  re.match(r"last\((\d+)([ymd])\)", item)
-        var = {"w":604800, "d":86400, "h":3600}
-        if match1:
-            var1, var2 = match1.groups()
-            return ("old", int(var1) * var[var2])
-        elif match2:
-            var1, var2 = match2.groups()
-            return ("last", [var2, int(var1)])
-        else:
-            return (None, None)
-                
+def update_work_page(site, work_page_name:str, work_template_name:str) -> dict:
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = False)
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ("old", 86400), "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
@@ -299,9 +285,16 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                 else:
                     result[title]["archive_page_name"] = f"{title}/{item}"
             elif key == "algo":
-                var1, var2 = get_time(item)
-                if var1 != None:
-                    result[title]["archive_time"]  = [var1, var2]
+                item = item.replace(" ", "").lower()
+                match1 = re.match(r"old\((\d+)([wdh])\)", item)
+                match2 =  re.match(r"last\((\d+)([ymd])\)", item)
+                if match1:
+                    var = {"w":604800, "d":86400, "h":3600}
+                    var1, var2 = match1.groups()
+                    result[title]["archive_time"]  = ["old", int(var1) * var[var2]]
+                elif match2:
+                    var1, var2 = match2.groups()
+                    result[title]["archive_time"]  = ["last", [var2, int(var1)]]
             elif key in ("counter", "minthreadsleft", "minthreadstoarchive"):
                 item = item.replace(" ", "")
                 if item.isdigit():
@@ -317,13 +310,14 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
             elif key == "archiveheader":
                 result[title]["archiveheader"] = item
             elif key.startswith("custom"):
-                if re.match(r".*?;\d+", item):
-                    var = re.match(r"(.*?);(\d+)$", item)
-                    if var:
-                        var1, var2 = var.groups()
-                        var3, var4 = get_time(var2)
-                        if var3 != None:
-                            result[title]["custom_rules"].append([var1, var3, var4])
+                var = re.match(r"(.*?);(old|last)\s*\(\s*(\d+)\s*([ymwdh])\s*\)$", item)
+                if var:
+                    var1, var2, var3, var4 = var.groups()
+                    if var2 == "old" and var3 in ("w", "d", "h"):
+                        var = {"w":604800, "d":86400, "h":3600}
+                        result[title]["custom_rules"].append([var1, "old", int(var3) * var[var4]])
+                    elif var2 == "last" and var3 in ("y", "m", "d"):
+                        result[title]["custom_rules"].append([var1, "last", [var4, int(var3)]])
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
         if "%(counter)d" not in result[title]["archive_page_name"]:
@@ -337,10 +331,6 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
         text = json.dumps(result, ensure_ascii = False, indent = 4, sort_keys = True)
         save(site, work_page, text, "Updated by Twelephant-bot")
     return result
-
-def get_pages_to_archive(site, work_page_name:str) -> dict:
-    work_page = pywikibot.Page(site, work_page_name)
-    return json.loads(work_page.text)
 
 def send_message(site, talk_page_name:str, message:str, summary:str):
     talk_page = pywikibot.Page(site, talk_page_name)
@@ -365,10 +355,10 @@ if __name__ == "__main__":
     times_now = 0
     WORK_PAGE_NAME = "User:Twelephant-bot/Work page.json"
     WORK_TEMPLATE_NAME = "User:Twelephant-bot/Archive"
+    page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
     while times_now < times_limit and check_switch(SITE, "User:Twelephant-bot/setting.json"):
-        if times_now % 10 == 0:
-            update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
-        page_list = get_pages_to_archive(SITE, WORK_PAGE_NAME)
+        if times_now % 10 == 1:
+            page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
         for page, pref in page_list.items():
             try:
                 archive_page(page, site = SITE, work_page_name = WORK_PAGE_NAME, work_template_name = WORK_TEMPLATE_NAME, **pref)
