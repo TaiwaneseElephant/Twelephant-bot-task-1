@@ -313,10 +313,10 @@ def update_work_page(site, work_page_name:str, work_template_name:str) -> dict:
                 var = re.match(r"(.*?);(old|last)\s*\(\s*(\d+)\s*([ymwdh])\s*\)$", item)
                 if var:
                     var1, var2, var3, var4 = var.groups()
-                    if var2 == "old" and var3 in ("w", "d", "h"):
+                    if var2 == "old" and var4 in ("w", "d", "h"):
                         var = {"w":604800, "d":86400, "h":3600}
                         result[title]["custom_rules"].append([var1, "old", int(var3) * var[var4]])
-                    elif var2 == "last" and var3 in ("y", "m", "d"):
+                    elif var2 == "last" and var4 in ("y", "m", "d"):
                         result[title]["custom_rules"].append([var1, "last", [var4, int(var3)]])
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
