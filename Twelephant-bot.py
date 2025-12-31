@@ -35,7 +35,8 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
         except pywikibot.exceptions.EditConflictError as e:
             print(f"Warning! There is an edit conflict on page '{page.title()}'!")
             retry_times += 1
-            page.get(force = True, get_redirect = True)
+            if not add:
+                page.get(force = True, get_redirect = True)
         except pywikibot.exceptions.LockedPageError as e:
             print(f"Warining! The edit attempt on page '{page.title()}' was disallowed because the page is protected!")
             break
