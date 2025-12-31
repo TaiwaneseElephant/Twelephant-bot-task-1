@@ -26,10 +26,8 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
     e = None
     while retry_times < max_retry_times:
         try:
-            if page.exists():
-                page.get(force = True, get_redirect = True)
             if add and page.exists():
-                page.text += text
+                page.text = page.get(force = True, get_redirect = True) + text
             else:
                 page.text = text
             page.save(summary, minor = minor)
@@ -37,6 +35,7 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
         except pywikibot.exceptions.EditConflictError as e:
             print(f"Warning! There is an edit conflict on page '{page.title()}'!")
             retry_times += 1
+            page.get(force = True, get_redirect = True)
         except pywikibot.exceptions.LockedPageError as e:
             print(f"Warining! The edit attempt on page '{page.title()}' was disallowed because the page is protected!")
             break
@@ -151,14 +150,16 @@ def update_counter(page_name:str, work_page_name:str, work_template_name:str, si
     text = json.dumps(page_list, ensure_ascii = False, indent = 4, sort_keys = True)
     save(site, work_page, text, "Updated by Twelephant-bot")
 
-def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(counter)d", archive_time:int = 86400, counter:int = 1, minthreadsleft:int = 5, minthreadstoarchive:int = 2, \
-                 archiveheader:str = "{{talkarchive}}", maxarchivesize:list[str, int] = ["Bytes", 1000000000], custom_rules:list[[str, int]] = [], work_page_name:str = "", work_template_name:str = "", **kwargs):
+def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(counter)d", archive_time:[str, int|list] = ["old", 86400], counter:int = 1, minthreadsleft:int = 5, minthreadstoarchive:int = 2, \
+                 archiveheader:str = "{{talkarchive}}", maxarchivesize:list[str, int] = ["Bytes", 1000000000], custom_rules:list = [], work_page_name:str = "", work_template_name:str = "", **kwargs):
     talk_page = pywikibot.Page(site, page_name)
     timestripper = textlib.TimeStripper(site)
     sections = textlib.extract_sections(talk_page.text, site)
     threads_num = len(sections.sections)
     maxthreadstoarchive = max(threads_num - minthreadsleft, 0)
     del_list = set()
+    time_type = archive_time[0]
+    archive_standard = archive_time[1]
     date_used = ("%(year)d" in archive_page_name) or ("%(month)d" in archive_page_name) or ("%(quarter)d" in archive_page_name)
     if date_used:
         archive_list = {}
@@ -175,23 +176,52 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             title = sections.sections[i].title
             custom_rules_used  = False
             fail = False
-            for rule, custom_time in custom_rules:
-                if re.match(rule, title):
-                    custom_rules_used  = True
-                    for j in signature_timestamp:
-                        time_then = timestripper.timestripper(j).timetuple()
-                        time_diff = time.time() - calendar.timegm(time_then)
-                        if time_diff < custom_time:
-                            fail = True
-                            break
+            if custom_rules != []:
+                for rule, custom_time_type, custom_time in custom_rules:
+                    if re.match(rule, title):
+                        custom_rules_used  = True
+                        for j in signature_timestamp:
+                            time_then = timestripper.timestripper(j).timetuple()
+                            if custom_time_type == "old":
+                                time_diff = time.time() - calendar.timegm(time_then)
+                                if time_diff < custom_time:
+                                    fail = True
+                                    break
+                            elif custom_time_type == "last":
+                                if archive_standard[0] == "y":
+                                    if (time.gmtime().tm_year - time_then.tm_year) < archive_standard[1]:
+                                        fail = True
+                                        break
+                                elif archive_standard[0] == "m":
+                                    if (time.gmtime().tm_mon - time_then.tm_mon) < archive_standard[1]:
+                                        fail = True
+                                        break
+                                elif archive_standard[0] == "d":
+                                    if (time.gmtime().tm_yday - time_then.tm_yday) < archive_standard[1]:
+                                        fail = True
+                                        break
             if not custom_rules_used:
                 fail = False
                 for j in signature_timestamp:
                     time_then = timestripper.timestripper(j).timetuple()
-                    time_diff = time.time() - calendar.timegm(time_then)
-                    if time_diff < archive_time:
-                        fail = True
-                        break
+                    if time_type == "old":
+                        time_diff = time.time() - calendar.timegm(time_then)
+                        if time_diff < archive_standard:
+                            fail = True
+                            break
+                    elif time_type == "last":
+                            if archive_standard[0] == "y":
+                                if (time.gmtime().tm_year - time_then.tm_year) < archive_standard[1]:
+                                    fail = True
+                                    break
+                            elif archive_standard[0] == "m":
+                                if (time.gmtime().tm_mon - time_then.tm_mon) < archive_standard[1]:
+                                    fail = True
+                                    break
+                            elif archive_standard[0] == "d":
+                                if (time.gmtime().tm_yday - time_then.tm_yday) < archive_standard[1]:
+                                    fail = True
+                                    break
             if fail:
                 continue
             if date_used:
@@ -234,16 +264,21 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
 def update_work_page(site, work_page_name:str, work_template_name:str):
     def get_time(text):
         item = text.replace(" ", "").lower()
-        match = re.match(r"old\((\d+)([wdh])\)", item)
+        match1 = re.match(r"old\((\d+)([wdh])\)", item)
+        match2 =  re.match(r"last\((\d+)([ymd])\)", item)
         var = {"w":604800, "d":86400, "h":3600}
-        if match:
-            var1, var2 = match.groups()
-            return int(var1) * var[var2]
+        if match1:
+            var1, var2 = match1.groups()
+            return ("old", int(var1) * var[var2])
+        elif match2:
+            var1, var2 = match2.groups()
+            return ("last", [var2, int(var1)])
         else:
-            return None
+            return (None, None)
+                
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = False)
     result = {}
-    default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : 86400, "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
+    default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ("old", 86400), "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
                "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
     for i in page_list:
         text = mwparser.parse(i.text, skip_style_tags = True)
@@ -263,9 +298,9 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                 else:
                     result[title]["archive_page_name"] = f"{title}/{item}"
             elif key == "algo":
-                var = get_time(item)
-                if var != None:
-                    result[title]["archive_time"]  = var
+                var1, var2 = get_time(item)
+                if var1 != None:
+                    result[title]["archive_time"]  = [var1, var2]
             elif key in ("counter", "minthreadsleft", "minthreadstoarchive"):
                 item = item.replace(" ", "")
                 if item.isdigit():
@@ -285,9 +320,9 @@ def update_work_page(site, work_page_name:str, work_template_name:str):
                     var = re.match(r"(.*?);(\d+)$", item)
                     if var:
                         var1, var2 = var.groups()
-                        var3 = get_time(var2)
+                        var3, var4 = get_time(var2)
                         if var3 != None:
-                            result[title]["custom_rules"].append([var1, var3])
+                            result[title]["custom_rules"].append([var1, var3, var4])
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
         if "%(counter)d" not in result[title]["archive_page_name"]:
@@ -320,11 +355,8 @@ def welcome_newcomers(new_page_list:dict, old_page_list:dict, site):
             send_welcome_message(i, site)
 
 def check_switch(site, switch_page_name:str) -> bool:
-    try:
-        switch_page = pywikibot.Page(site, switch_page_name)
-        return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
-    except:
-        return True
+    switch_page = pywikibot.Page(site, switch_page_name)
+    return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
 
 if __name__ == "__main__":
     SITE = pywikibot.Site('wikipedia:zh')
@@ -332,11 +364,9 @@ if __name__ == "__main__":
     times_now = 0
     WORK_PAGE_NAME = "User:Twelephant-bot/Work page.json"
     WORK_TEMPLATE_NAME = "User:Twelephant-bot/Archive"
-    while times_now < times_limit:
+    while times_now < times_limit and check_switch(SITE, "User:Twelephant-bot/setting.json"):
         if times_now % 10 == 0:
             update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
-            if not check_switch(SITE, "User:Twelephant-bot/setting.json"):
-                break
         page_list = get_pages_to_archive(SITE, WORK_PAGE_NAME)
         for page, pref in page_list.items():
             try:
