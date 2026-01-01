@@ -353,10 +353,10 @@ def check_switch(site, switch_page_name:str) -> bool:
 if __name__ == "__main__":
     SITE = pywikibot.Site('wikipedia:zh')
     times_limit = float("inf")
-    times_now = 0
     WORK_PAGE_NAME = "User:Twelephant-bot/Work page.json"
     WORK_TEMPLATE_NAME = "User:Twelephant-bot/Archive"
     if check_switch(SITE, "User:Twelephant-bot/setting.json"):
+        print("Start!")
         page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
         for page, pref in page_list.items():
             try:
