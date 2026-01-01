@@ -356,16 +356,13 @@ if __name__ == "__main__":
     times_now = 0
     WORK_PAGE_NAME = "User:Twelephant-bot/Work page.json"
     WORK_TEMPLATE_NAME = "User:Twelephant-bot/Archive"
-    page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
-    while times_now < times_limit and check_switch(SITE, "User:Twelephant-bot/setting.json"):
-        if times_now % 10 == 1:
-            page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
+    if check_switch(SITE, "User:Twelephant-bot/setting.json"):
+        page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
         for page, pref in page_list.items():
             try:
                 archive_page(page, site = SITE, work_page_name = WORK_PAGE_NAME, work_template_name = WORK_TEMPLATE_NAME, **pref)
                 print(page)
             except  Exception as e:
                 print(f"Skipped page '{page}', its prefercence is {pref}, and the error is {e}")
-        print("Sleep for 600 seconds.")
+        print(f"Sleep for 600 seconds since{time.gmtime()}.")
         time.sleep(600)
-        times_now += 1
