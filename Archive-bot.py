@@ -175,6 +175,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             continue
         if (signature_timestamp := find_signature_timestamp(content)):
             title = sections.sections[i].title.strip().strip("==").strip()
+            print(title)
             custom_rules_used  = False
             fail = False
             if custom_rules != []:
