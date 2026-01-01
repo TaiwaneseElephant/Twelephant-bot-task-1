@@ -179,26 +179,26 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             custom_rules_used  = False
             fail = False
             if custom_rules != []:
-                for rule, custom_time_type, custom_time in custom_rules:
+                for rule, custom_time_type, custom_standard in custom_rules:
                     if re.match(rule, title):
                         custom_rules_used  = True
                         for j in signature_timestamp:
                             time_then = timestripper.timestripper(j).timetuple()
                             if custom_time_type == "old":
                                 time_diff = time.time() - calendar.timegm(time_then)
-                                if time_diff < custom_time:
+                                if time_diff < custom_standard:
                                     fail = True
                                     break
                             elif custom_time_type == "last":
-                                if archive_standard[0] == "y":
+                                if custom_standard[0] == "y":
                                     if (time.gmtime().tm_year - time_then.tm_year) < archive_standard[1]:
                                         fail = True
                                         break
-                                elif archive_standard[0] == "m":
+                                elif custom_standard[0] == "m":
                                     if (time.gmtime().tm_mon - time_then.tm_mon) < archive_standard[1]:
                                         fail = True
                                         break
-                                elif archive_standard[0] == "d":
+                                elif custom_standardd[0] == "d":
                                     if (time.gmtime().tm_yday - time_then.tm_yday) < archive_standard[1]:
                                         fail = True
                                         break
