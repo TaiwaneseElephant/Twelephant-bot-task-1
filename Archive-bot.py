@@ -182,23 +182,29 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                 for rule, custom_time_type, custom_standard in custom_rules:
                     if re.match(rule, title):
                         custom_rules_used  = True
-                        for j in signature_timestamp:
-                            time_then = timestripper.timestripper(j).timetuple()
-                            if custom_time_type == "old":
+                        if custom_time_type == "old":
+                            for j in signature_timestamp:
+                                time_then = timestripper.timestripper(j).timetuple()
                                 time_diff = time.time() - calendar.timegm(time_then)
                                 if time_diff < custom_standard:
                                     fail = True
                                     break
-                            elif custom_time_type == "last":
-                                if custom_standard[0] == "y":
+                        elif custom_time_type == "last":
+                            if custom_standard[0] == "y":
+                                for j in signature_timestamp:
+                                    time_then = timestripper.timestripper(j).timetuple()
                                     if (time.gmtime().tm_year - time_then.tm_year) < archive_standard[1]:
                                         fail = True
                                         break
-                                elif custom_standard[0] == "m":
+                            elif custom_standard[0] == "m":
+                                for j in signature_timestamp:
+                                    time_then = timestripper.timestripper(j).timetuple()
                                     if (time.gmtime().tm_mon - time_then.tm_mon) < archive_standard[1]:
                                         fail = True
                                         break
-                                elif custom_standardd[0] == "d":
+                            elif custom_standardd[0] == "d":
+                                for j in signature_timestamp:
+                                    time_then = timestripper.timestripper(j).timetuple()
                                     if (time.gmtime().tm_yday - time_then.tm_yday) < archive_standard[1]:
                                         fail = True
                                         break
