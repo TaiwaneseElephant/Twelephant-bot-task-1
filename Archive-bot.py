@@ -236,15 +236,14 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                             if (time.gmtime().tm_yday - time_then.tm_yday) < archive_standard[1]:
                                 fail = True
                                 break
-            if fail:
-                continue
-            if date_used:
-                if (time_then.tm_year, time_then.tm_mon) in archive_list:
-                    archive_list[(time_then.tm_year, time_then.tm_mon)].append(i)
+            if not fail:
+                if date_used:
+                    if (time_then.tm_year, time_then.tm_mon) in archive_list:
+                        archive_list[(time_then.tm_year, time_then.tm_mon)].append(i)
+                    else:
+                        archive_list[(time_then.tm_year, time_then.tm_mon)] = [i]
                 else:
-                    archive_list[(time_then.tm_year, time_then.tm_mon)] = [i]
-            else:
-                archive_list.append(i)
+                    archive_list.append(i)
             del_list.add(i)
         else:
             continue
