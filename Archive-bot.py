@@ -363,7 +363,9 @@ if __name__ == "__main__":
         for page, pref in page_list.items():
             try:
                 archive_page(page, site = SITE, work_page_name = WORK_PAGE_NAME, work_template_name = WORK_TEMPLATE_NAME, **pref)
+                print(page)
             except  Exception as e:
                 print(f"Skipped page '{page}', its prefercence is {pref}, and the error is {e}")
+        print("Sleep for 600 seconds.")
         time.sleep(600)
         times_now += 1
