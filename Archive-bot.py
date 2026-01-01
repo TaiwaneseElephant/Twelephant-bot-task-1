@@ -367,7 +367,6 @@ if __name__ == "__main__":
     WORK_PAGE_NAME = "User:Twelephant-bot/Work page.json"
     WORK_TEMPLATE_NAME = "User:Twelephant-bot/Archive"
     if check_switch(SITE, "User:Twelephant-bot/setting.json"):
-        print("Start!")
         page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
         for page, pref in page_list.items():
             try:
