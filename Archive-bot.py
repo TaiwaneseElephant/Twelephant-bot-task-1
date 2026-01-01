@@ -152,7 +152,7 @@ def update_counter(page_name:str, work_page_name:str, work_template_name:str, si
     save(site, work_page, text, "Updated by Twelephant-bot")
 
 def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(counter)d", archive_time:[str, int|list] = ["old", 86400], counter:int = 1, minthreadsleft:int = 5, minthreadstoarchive:int = 2, \
-                 archiveheader:str = "{{talkarchive}}", maxarchivesize:list[str, int] = ["Bytes", 1000000000], custom_rules:list = [], work_page_name:str = "", work_template_name:str = "", **kwargs):
+                 archiveheader:str = "{{talkarchive}}", maxarchivesize:[str, int] = ["Bytes", 1000000000], custom_rules:list = [], work_page_name:str = "", work_template_name:str = "", **kwargs):
     talk_page = pywikibot.Page(site, page_name)
     timestripper = textlib.TimeStripper(site)
     sections = textlib.extract_sections(talk_page.text, site)
@@ -193,19 +193,19 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                             if custom_standard[0] == "y":
                                 for j in signature_timestamp:
                                     time_then = timestripper.timestripper(j).timetuple()
-                                    if (time.gmtime().tm_year - time_then.tm_year) < archive_standard[1]:
+                                    if (time.gmtime().tm_year - time_then.tm_year) < custom_standard[1]:
                                         fail = True
                                         break
                             elif custom_standard[0] == "m":
                                 for j in signature_timestamp:
                                     time_then = timestripper.timestripper(j).timetuple()
-                                    if (time.gmtime().tm_mon - time_then.tm_mon) < archive_standard[1]:
+                                    if (time.gmtime().tm_mon - time_then.tm_mon) < custom_standard[1]:
                                         fail = True
                                         break
-                            elif custom_standardd[0] == "d":
+                            elif custom_standard[0] == "d":
                                 for j in signature_timestamp:
                                     time_then = timestripper.timestripper(j).timetuple()
-                                    if (time.gmtime().tm_yday - time_then.tm_yday) < archive_standard[1]:
+                                    if (time.gmtime().tm_yday - time_then.tm_yday) < custom_standard[1]:
                                         fail = True
                                         break
             if not custom_rules_used:
