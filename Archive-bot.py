@@ -362,7 +362,7 @@ def update_work_page(site, work_page_name:str, work_template_name:str) -> dict:
     old_page_list = json.loads(work_page.text)
     if old_page_list != result:
         welcome_newcomers(result, old_page_list, site)
-        text = json.dumps(result, ensure_ascii = False, indent = 4, sort_keys = True)
+        text = json.dumps(result, ensure_ascii = False, indent = 4)
         save(site, work_page, text, "Updated by Twelephant-bot")
     return result
 
