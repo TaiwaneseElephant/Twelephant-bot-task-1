@@ -126,7 +126,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
             return 0, archive_list
 
 def del_archived(site, talk_page, del_list:set, sections, unarchived:list):
-    page.get(force = True, get_redirect = True)
+    talk_page.get(force = True, get_redirect = True)
     sections = textlib.extract_sections(talk_page.text, site)
     new_page_text = "".join(f"{sections.sections[i].title}{sections.sections[i].content}" for i in range(len(sections.sections)) if i not in del_list or i in unarchived)
     text = sections.header + new_page_text
