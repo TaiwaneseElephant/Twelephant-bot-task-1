@@ -128,8 +128,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
 def del_archived(site, talk_page, del_list:set, unarchived:list):
     talk_page.get(force = True, get_redirect = True)
     sections = textlib.extract_sections(talk_page.text, site)
-    print("del archived")
-    new_page_text = "".join(f"{sections.sections[i].title}{sections.sections[i].content}" for i in range(len(sections.sections)) if i not in del_list or i in unarchived)
+    new_page_text = "".join(f"{sections.sections[i].title}{sections.sections[i].content}" for i in range(len(sections.sections)) if (i not in del_list) or (i in unarchived))
     text = sections.header + new_page_text
     save(site, talk_page, text, f"Archived {len(del_list) - len(unarchived)} threads by Twelephant-bot")
 
@@ -267,7 +266,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                         archive_list[(last_time.tm_year, last_time.tm_mon)] = [i]
                 else:
                     archive_list.append(i)
-            del_list.add(i)
+                del_list.add(i)
         else:
             continue
 
