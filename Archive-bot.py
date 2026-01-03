@@ -185,7 +185,6 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             if custom_rules != []:
                 for rule, custom_time_type, custom_standard in custom_rules:
                     if re.match(rule, title):
-                        custom_rules_used  = True
                         if custom_time_type == "old":
                             for j in signature_timestamp:
                                 time_then = timestripper.timestripper(j).timetuple()
@@ -221,6 +220,8 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                                         break
                                     if calendar.timegm(time_then) > last_timestamp:
                                         last_time = time_then
+                        custom_rules_used  = True
+                        break
             if not custom_rules_used:
                 fail = False
                 if time_type == "old":
