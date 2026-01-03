@@ -169,7 +169,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
         if len(del_list) == maxthreadstoarchive:
             break
         content = sections.sections[i].content
-        if "{{nosave}}" in content.lower():
+        if "{{不存檔}}" in content:
             continue
         if (signature_timestamp := find_signature_timestamp(content)):
             title = sections.sections[i].title.strip().strip("==").strip()
