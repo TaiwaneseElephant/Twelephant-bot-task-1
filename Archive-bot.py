@@ -302,7 +302,7 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ("old", 86400), "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
                "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
-    default_custom_rules = {"afd" : "[[:.*?]]頁面存廢討論通知", "copyvio" : "您創建的條目[[:.*?]]可能侵犯版權", "csd" : "[[:.*?]]的快速刪除通知", "ffd" : "[[:.*?]]檔案存廢討論通知"}
+    default_custom_rules = {"afd" : "[[:.*?]]頁面存廢討論通知", "csd" : "[[:.*?]]的快速刪除通知", "ffd" : "[[:.*?]]檔案存廢討論通知"}
     for i in page_list:
         text = mwparser.parse(i.text, skip_style_tags = True)
         if denybots(text) or not (match := text.filter_templates(matches = work_template_name)):
