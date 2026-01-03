@@ -298,8 +298,9 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ["old", 86400], "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
                "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
-    option_rules = {"afd" : r"\[\[.*?\]\]页面存废讨论通知", "csd" : r"\[\[.*?\]\]的快速删除通知", "ifd" : r"\[\[.*?\]\]-\{zh-hans:文件;zh-hant:檔案;\}-存廢討論通知", "rfc" : r"\d\d\d\d年\d\d?月徵求意見討論邀請", \
-                            "orfud" : r"未被条目使用的非自由版权图片[[.*?]]", "replaceable" : "可被替代的非自由檔案[[.*?]]快速刪除通知"}
+    option_rules = {"afd" : r"\[\[.*?\]\]页面存废讨论通知", "csd" : r"\[\[.*?\]\]的快速删除通知", "ifd" : r"\[\[.*?\]\]-\{zh-hans:文件;zh-hant:檔案;\}-存廢討論通知", \
+                    "rfc" : r"\d\d\d\d年\d\d?月徵求意見討論邀請", "norationale" : \[\[.*?\]\]缺乏合理使用依據通知, "orfud" : r"未被条目使用的非自由版权图片\[\[.*?\]\]", \
+                    "replaceable" : "可被替代的非自由檔案\[\[.*?\]\]快速刪除通知"}
     for i in page_list:
         if not i.botMayEdit():
             continue 
