@@ -13,13 +13,9 @@ import copy
 __copyright__ = "Copyright (c) Taiwanese Elephant"
 
 TIME_STAMP_PATTERN = re.compile(r"\d\d\d\d年\d(?:\d)?月\d(?:\d)?日 \([一二三四五六日]\) \d\d:\d\d \(UTC\)")
-DENYBOTS_PATTERN = re.compile(r"{{(?:bots\|(?:deny=(?:(?:.*?,)?all(?:,.*?)?|(?:.*?,)?twelephant-bot(?:,.*?)?)|allow=(?:.*?,)?none(?:,.*?)?|optout=(?:.*?,)?all(?:,.*?)?))}}")
 
 def find_signature_timestamp(text:str) -> list:
     return [i.group() for i in TIME_STAMP_PATTERN.finditer(text)]
-
-def denybots(wikitext) -> bool:
-    return wikitext.filter_templates(matches = "Nobots") or DENYBOTS_PATTERN.search(str(wikitext.filter_templates(matches = "Bots")).lower())
 
 def save(site, page:str, text:str, summary:str = "", add = False, minor = True, max_retry_times = 3):
     retry_times = 0
@@ -304,8 +300,10 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
                "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
     default_custom_rules = {"afd" : "[[:.*?]]頁面存廢討論通知", "csd" : "[[:.*?]]的快速刪除通知", "ifd" : "[[:.*?]]檔案存廢討論通知"}
     for i in page_list:
+        if not i.botMayEdit():
+            continue 
         text = mwparser.parse(i.text, skip_style_tags = True)
-        if denybots(text) or not (match := text.filter_templates(matches = work_template_name)):
+        if not (match := text.filter_templates(matches = work_template_name)):
             continue
         title = i.title()
         match = match[0]
