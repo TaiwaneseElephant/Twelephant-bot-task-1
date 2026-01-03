@@ -207,7 +207,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                             elif custom_standard[0] == "m":
                                 for j in signature_timestamp:
                                     time_then = timestripper.timestripper(j).timetuple()
-                                    if (time.gmtime().tm_mon - time_then.tm_mon) < custom_standard[1]:
+                                    if (time.gmtime().tm_year - time_then.tm_year) * 12 + (time.gmtime().tm_mon - time_then.tm_mon) < custom_standard[1]:
                                         fail = True
                                         break
                                     if calendar.timegm(time_then) > last_timestamp:
@@ -215,7 +215,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                             elif custom_standard[0] == "d":
                                 for j in signature_timestamp:
                                     time_then = timestripper.timestripper(j).timetuple()
-                                    if (time.gmtime().tm_yday - time_then.tm_yday) < custom_standard[1]:
+                                    if (time.gmtime().tm_year - time_then.tm_year) * 365 + (time.gmtime().tm_yday - time_then.tm_yday) < custom_standard[1]:
                                         fail = True
                                         break
                                     if calendar.timegm(time_then) > last_timestamp:
