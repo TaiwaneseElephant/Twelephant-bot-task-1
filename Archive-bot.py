@@ -297,7 +297,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                         header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list, [])
 
-def update_work_page(site, work_page_name:str, work_template_name:str) -> dict:
+def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = False)
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ("old", 86400), "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
@@ -353,6 +353,7 @@ def update_work_page(site, work_page_name:str, work_template_name:str) -> dict:
                         result[title]["custom_rules"].append([var1, "old", int(var3) * var[var4]])
                     elif var2 == "last" and var4 in ("y", "m", "d"):
                         result[title]["custom_rules"].append([var1, "last", [var4, int(var3)]])
+            elif key in
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
         if "%(counter)d" not in result[title]["archive_page_name"]:
@@ -392,7 +393,7 @@ if __name__ == "__main__":
     WORK_PAGE_NAME = "User:Twelephant-bot/Work page.json"
     WORK_TEMPLATE_NAME = "User:Twelephant-bot/Archive"
     if check_switch(SITE, "User:Twelephant-bot/setting.json"):
-        page_list = update_work_page(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
+        page_list = get_page_list(SITE, WORK_PAGE_NAME, WORK_TEMPLATE_NAME)
         for page, pref in page_list.items():
             try:
                 archive_page(page, site = SITE, work_page_name = WORK_PAGE_NAME, work_template_name = WORK_TEMPLATE_NAME, **pref)
