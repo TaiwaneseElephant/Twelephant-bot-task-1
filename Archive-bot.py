@@ -298,7 +298,7 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ("old", 86400), "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
                "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
-    default_custom_rules = {"afd" : r"[[:.*?]]頁面存廢討論通知", "csd" : r"[[:.*?]]的快速刪除通知", "ifd" : r"[[:.*?]]檔案存廢討論通知", "rfc" : r"\d\d\d\d年\d\d?月徵求意見討論邀請"}
+    default_custom_rules = {"afd" : r"[[:.*?]]頁面存廢討論通知", "csd" : r"[[:.*?]]的快速刪除通知", "ifd" : r"[[:.*?]]檔案存廢討論通知", "rfc" : r"\d\d\d\d年\d\d?月徵求意見討論邀請", "orfud" : r"未被條目使用的非自由版權圖片[[:.*?]]"}
     for i in page_list:
         if not i.botMayEdit():
             continue 
