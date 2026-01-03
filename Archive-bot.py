@@ -298,7 +298,7 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ["old", 86400], "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], "minthreadsleft" : 5, \
                "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
-    default_custom_rules = {"afd" : r"\[\[.*?\]\]页面存废讨论通知", "csd" : r"\[\[.*?\]\]的快速删除通知", "ifd" : r"\[\[.*?\]\]-\{zh-hans:文件;zh-hant:檔案;\}-存廢討論通知", "rfc" : r"\d\d\d\d年\d\d?月徵求意見討論邀請", \
+    option_rules = {"afd" : r"\[\[.*?\]\]页面存废讨论通知", "csd" : r"\[\[.*?\]\]的快速删除通知", "ifd" : r"\[\[.*?\]\]-\{zh-hans:文件;zh-hant:檔案;\}-存廢討論通知", "rfc" : r"\d\d\d\d年\d\d?月徵求意見討論邀請", \
                             "orfud" : r"未被条目使用的非自由版权图片[[.*?]]", "replaceable" : "可被替代的非自由檔案[[.*?]]快速刪除通知"}
     for i in page_list:
         if not i.botMayEdit():
@@ -353,17 +353,17 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
                         result[title]["custom_rules"].append([var1, "old", int(var3) * var[var4]])
                     elif var2 == "last" and var4 in ("y", "m", "d"):
                         result[title]["custom_rules"].append([var1, "last", [var4, int(var3)]])
-            elif key in default_custom_rules:
+            elif key in option_rules:
                 item = item.replace(" ", "").lower()
                 match1 = re.match(r"old\((\d+)([wdh])\)", item)
                 match2 =  re.match(r"last\((\d+)([ymd])\)", item)
                 if match1:
                     var = {"w":604800, "d":86400, "h":3600}
                     var1, var2 = match1.groups()
-                    result[title]["custom_rules"].append([default_custom_rules[key], "old", int(var1) * var[var2]])
+                    result[title]["custom_rules"].append([option_rules[key], "old", int(var1) * var[var2]])
                 elif match2:
                     var1, var2 = match2.groups()
-                    result[title]["custom_rules"].append([default_custom_rules[key], "last", [var2, int(var1)]])
+                    result[title]["custom_rules"].append([option_rules[key], "last", [var2, int(var1)]])
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
         if "%(counter)d" not in result[title]["archive_page_name"]:
