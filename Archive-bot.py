@@ -19,11 +19,13 @@ def find_signature_timestamp(text:str) -> list:
 
 def save(site, page:str, text:str, summary:str = "", add = False, minor = True, max_retry_times = 3):
     retry_times = 0
-    e = None
+    e = None 
+    if add and page.exists():
+        page.get(force = True, get_redirect = True)
     while retry_times < max_retry_times:
         try:
             if add and page.exists():
-                page.text = page.get(force = True, get_redirect = True) + text
+                page.text += text
             else:
                 page.text = text
             page.save(summary, minor = minor)
@@ -31,8 +33,7 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
         except pywikibot.exceptions.EditConflictError as e:
             print(f"Warning! There is an edit conflict on page '{page.title()}'!")
             retry_times += 1
-            if not add:
-                page.get(force = True, get_redirect = True)
+            page.get(force = True, get_redirect = True)
         except pywikibot.exceptions.LockedPageError as e:
             print(f"Warning! The edit attempt on page '{page.title()}' was disallowed because the page is protected!")
             break
