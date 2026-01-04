@@ -136,8 +136,8 @@ def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_us
         else:
             work_page = pywikibot.Page(site, work_page_name)
             page_list = json.loads(work_page.text)
-            if page.title() in page_list:
-                del page_list[page.title()]
+            if talk_page.title() in page_list:
+                del page_list[talk_page.title()]
         text = json.dumps(page_list, ensure_ascii = False, indent = 4, sort_keys = True)
         save(site, work_page, text, "Updated by Twelephant-bot")
     save(site, talk_page, text, f"Archived {len(del_list) - len(unarchived)} threads by Twelephant-bot")
