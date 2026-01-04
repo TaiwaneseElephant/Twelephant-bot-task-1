@@ -144,7 +144,7 @@ def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_us
         save(site, work_page, json_text, "Updated by Twelephant-bot")
     save(site, talk_page, text, f"Archived {len(del_list) - len(unarchived)} threads by Twelephant-bot")
 
-def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(counter)d", archive_time:[str, int|list] = ["old", 86400], counter:int = 1, minthreadsleft:int = 5, minthreadstoarchive:int = 2, \
+def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(counter)d", archive_time:list = ["old", 86400], counter:int = 1, minthreadsleft:int = 5, minthreadstoarchive:int = 2, \
                  archiveheader:str = "{{talkarchive}}", maxarchivesize:[str, int] = ["Bytes", 1000000000], custom_rules:list = [], work_page_name:str = "", work_template_name:str = "", **kwargs):
     talk_page = pywikibot.Page(site, page_name)
     timestripper = textlib.TimeStripper(site)
