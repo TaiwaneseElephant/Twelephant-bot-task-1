@@ -116,7 +116,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
         else:
             return 0, archive_list
 
-def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_used:bool = False, counter:int = 0):
+def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_used:bool = False, counter:int = 0, work_template_name:str = "", work_page_name:str = ""):
     talk_page.get(force = True, get_redirect = True)
     sections = textlib.extract_sections(talk_page.text, site)
     new_page_text = "".join(f"{sections.sections[i].title}{sections.sections[i].content}" for i in range(len(sections.sections)) if (i not in del_list) or (i in unarchived))
@@ -264,7 +264,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             unarchived = []
             unarchived.extend(archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
                         header = archiveheader, counter_used = True, counter = counter, maxarchivesize = maxarchivesize)[1])
-            del_archived(site, talk_page, del_list, unarchived, True, counter)
+            del_archived(site, talk_page, del_list, unarchived, True, counter, work_template_name, work_page_name)
 
         else:
             if date_used:
