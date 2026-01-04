@@ -37,13 +37,13 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
             print(f"Warning! The edit attempt on page '{page.title()}' was disallowed because the page is protected!")
             break
         except pywikibot.exceptions.AbuseFilterDisallowedError as e:
-            print(f"Warining! The edit attempt on page '{page.title()}' was disallowed by the AbuseFilter!")
+            print(f"Warning! The edit attempt on page '{page.title()}' was disallowed by the AbuseFilter!")
             break
         except pywikibot.exceptions.SpamblacklistError as e:
             print(f"Warning! The edit attempt on page '{page.title()}' was disallowed by the SpamFilter because the edit add blacklisted URL!")
             break
         except pywikibot.exceptions.TitleblacklistError as e:
-            print(f"Warining! The edit attempt on page '{page.title()}' was disallowed because the title is blacklisted!")
+            print(f"Warning! The edit attempt on page '{page.title()}' was disallowed because the title is blacklisted!")
             break
     print(f"The attempt to edit the page '{page.title()}' was stopped because of the error below:\n{e}\nThe edit is '{text[:100]}', and the summary is '{summary}'.")
     return False
