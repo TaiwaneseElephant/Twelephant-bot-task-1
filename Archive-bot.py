@@ -89,8 +89,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
             else:
                 text = f"{header}\n"
             if len(text.encode("utf-8")) > maxarchivesize[1]:
-                new_counter, last_list = archive(archive_page_name, site, archive_list[i:], sections, talk_page_name, header, \
-                                                    True, counter + 1, maxarchivesize, depth + 1)
+                new_counter, last_list = archive(archive_page_name, site, archive_list, sections, talk_page_name, header, True, counter + 1, maxarchivesize, depth + 1)
                 return new_counter, last_list
             else:
                 for i, j in enumerate(archive_list):
