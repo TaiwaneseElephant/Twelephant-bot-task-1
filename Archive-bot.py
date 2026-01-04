@@ -19,7 +19,8 @@ def find_signature_timestamp(text:str) -> list:
 
 def save(site, page:str, text:str, summary:str = "", add = False, minor = True, max_retry_times = 3):
     retry_times = 0
-    e = None 
+    e = None
+    oringinal_text = ""
     if add and page.exists():
         oringinal_text = page.get(force = True, get_redirect = True)
     while retry_times < max_retry_times:
