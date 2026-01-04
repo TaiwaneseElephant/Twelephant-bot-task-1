@@ -395,11 +395,12 @@ def run():
     if check_switch(site, "User:Twelephant-bot/setting.json"):
         page_list = get_page_list(site, work_page_name, work_template_name)
         for page, pref in page_list.items():
-            try:
-                archive_page(page, site = site, work_page_name = work_page_name, work_template_name = work_template_name, **pref)
-                print(page)
-            except  Exception as e:
-                print(f"Skipped page '{page}', its prefercence is {pref}, and the error is {e}")
+            if check_switch(site, "User:Twelephant-bot/setting.json"):
+                try:
+                    archive_page(page, site = site, work_page_name = work_page_name, work_template_name = work_template_name, **pref)
+                    print(page)
+                except  Exception as e:
+                    print(f"Skipped page '{page}', its prefercence is {pref}, and the error is {e}")
         print(f"Sleep for 600 seconds since{time.gmtime()}.")
         time.sleep(600)
 
