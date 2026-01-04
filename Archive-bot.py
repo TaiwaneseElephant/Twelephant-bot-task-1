@@ -116,7 +116,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
         else:
             return 0, archive_list
 
-def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_used:bool = False, counter:int = 0, work_template_name:str = "", work_page_name:str = ""):
+def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_used:bool = False, counter:int = 0, new_counter:int = 0, work_template_name:str = "", work_page_name:str = ""):
     talk_page.get(force = True, get_redirect = True)
     sections = textlib.extract_sections(talk_page.text, site)
     new_page_text = "".join(f"{sections.sections[i].title}{sections.sections[i].content}" for i in range(len(sections.sections)) if (i not in del_list) or (i in unarchived))
@@ -151,7 +151,8 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     del_list = set()
     time_type = archive_time[0]
     archive_standard = archive_time[1]
-    date_used = ("%(year)d" in archive_page_name) or ("%(month)d" in archive_page_name) or ("%(quarter)d" in archive_page_name)
+    date_used = ("%(year)d" in archive_page_name) or ("%(month)d" in archive_page_name) or ("%(quarter)d" in archive_page_name) 
+    counter_used = ("%(counter)d" in archive_page_name) and not date_used
     if date_used:
         archive_list = {}
     else:
@@ -260,21 +261,22 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             continue
 
     if del_list != set() and len(del_list) >= minthreadstoarchive:
-        if ("%(counter)d" in archive_page_name):
+        if counter_used:
             unarchived = []
-            unarchived.extend(archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
-                        header = archiveheader, counter_used = True, counter = counter, maxarchivesize = maxarchivesize)[1])
-            del_archived(site, talk_page, del_list, unarchived, True, counter, work_template_name, work_page_name)
+            result = archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
+                            header = archiveheader, counter_used = True, counter = counter, maxarchivesize = maxarchivesize)
+            unarchived.extend(result[1])
+            new_counter = result[0]
+            del_archived(site, talk_page, del_list, unarchived, True, counter, new_counter, work_template_name, work_page_name)
 
-        else:
-            if date_used:
-                for i in archive_list.keys():
-                    achive_name = archive_page_name.replace("%(year)d", str(i[0])).replace("%(month)d", str(i[1])).replace("%(quarter)d", str(math.ceil(i[1] / 3)))
-                    archive(archive_page_name = achive_name, site = site, archive_list = archive_list[i], sections = sections, talk_page_name = page_name, \
-                            header = archiveheader, counter_used = False)
-            else:
-                archive(archive_page_name = achive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
+        elif date_used:
+            for i in archive_list.keys():
+                achive_name = archive_page_name.replace("%(year)d", str(i[0])).replace("%(month)d", str(i[1])).replace("%(quarter)d", str(math.ceil(i[1] / 3)))
+                archive(archive_page_name = achive_name, site = site, archive_list = archive_list[i], sections = sections, talk_page_name = page_name, \
                         header = archiveheader, counter_used = False)
+        else:
+            archive(archive_page_name = achive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
+                    header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list)
 
 def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
