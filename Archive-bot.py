@@ -89,26 +89,27 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
             else:
                 text = f"{header}\n"
             if len(text_.encode("utf-8")) > maxarchivesize[1]:
-                saved = save(site, archive_page, text, f"Archived {i} threads from [[{talk_page_name}]] by Twelephant-bot")
                 new_counter, last_list = archive(archive_page_name, site, archive_list[i:], sections, talk_page_name, header, \
                                                     True, counter + 1, maxarchivesize, depth + 1)
-            for i, j in enumerate(archive_list):
-                text_ = f"{text}\n{sections.sections[j].title}{sections.sections[j].content}"
-                if len(text_.encode("utf-8")) < maxarchivesize[1]:
-                    text = text_
-                else:
-                    saved = save(site, archive_page, text, f"Archived {i} threads from [[{talk_page_name}]] by Twelephant-bot")
-                    new_counter, last_list = archive(archive_page_name, site, archive_list[i:], sections, talk_page_name, header, \
-                                                     True, counter + 1, maxarchivesize, depth + 1)
-                    if saved:
-                        return new_counter, last_list
-                    else:
-                        return new_counter, last_list + archive_list[:i]
-            saved = save(site, archive_page, text, f"Archived {len(archive_list)} threads from [[{talk_page_name}]] by Twelephant-bot")
-            if saved:
-                return counter, []
+                return new_counter, last_list
             else:
-                return counter, archive_list
+                for i, j in enumerate(archive_list):
+                    text_ = f"{text}\n{sections.sections[j].title}{sections.sections[j].content}"
+                    if len(text_.encode("utf-8")) < maxarchivesize[1]:
+                        text = text_
+                    else:
+                        saved = save(site, archive_page, text, f"Archived {i} threads from [[{talk_page_name}]] by Twelephant-bot")
+                        new_counter, last_list = archive(archive_page_name, site, archive_list[i:], sections, talk_page_name, header, \
+                                                         True, counter + 1, maxarchivesize, depth + 1)
+                        if saved:
+                            return new_counter, last_list
+                        else:
+                            return new_counter, last_list + archive_list[:i]
+                saved = save(site, archive_page, text, f"Archived {len(archive_list)} threads from [[{talk_page_name}]] by Twelephant-bot")
+                if saved:
+                    return counter, []
+                else:
+                    return counter, archive_list
         else:
             return counter, archive_list
     else:
