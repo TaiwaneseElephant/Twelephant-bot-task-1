@@ -50,7 +50,7 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
     return False
 
 def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_name:str, header:str, counter_used:bool = False, counter:int = 0, \
-            maxarchivesize:list = ["Bytes", 1000000000], work_page_name:str = "", work_template_name:str = "", top:bool = True, depth:int = 0):
+            maxarchivesize:list = ["Bytes", 1000000000], depth:int = 0):
     if depth > 10:
         return counter, archive_list
     archive_page = pywikibot.Page(site, archive_page_name.replace("%(counter)d", str(counter)))
@@ -59,9 +59,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
             max_sections_num = maxarchivesize[1] - len(textlib.extract_sections(archive_page.text, site).sections)
             if max_sections_num <= 0:
                 new_counter, last_list = archive(archive_page_name, site, archive_list, sections, talk_page_name, header, \
-                                                 True, counter + 1, maxarchivesize, work_page_name, work_template_name, False, depth + 1)
-                if top and counter != new_counter:
-                    update_counter(talk_page_name, work_page_name, work_template_name, site, new_counter)
+                                                 True, counter + 1, maxarchivesize, depth + 1)
                 return new_counter, last_list
             elif max_sections_num < len(archive_list):
                 text = "".join(f"\n{sections.sections[i].title}{sections.sections[i].content}" for i in archive_list[:max_sections_num])
@@ -70,9 +68,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
                 saved = save(site, archive_page, text, f"Archived {min(max_sections_num, len(archive_list))} threads from [[{talk_page_name}]] by Twelephant-bot", \
                              add = archive_page.exists())
                 new_counter, last_list = archive(archive_page_name, site, archive_list[max_sections_num:], sections, talk_page_name, header, \
-                                                 True, counter + 1, maxarchivesize, work_page_name, work_template_name, False, depth + 1)
-                if top and counter != new_counter:
-                    update_counter(talk_page_name, work_page_name, work_template_name, site, new_counter)
+                                                 True, counter + 1, maxarchivesize, depth + 1)
                 if saved:
                     return new_counter, last_list
                 else:
@@ -122,33 +118,30 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
         else:
             return 0, archive_list
 
-def del_archived(site, talk_page, del_list:set, unarchived:list):
+def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_used:bool = False, counter:int = 0):
     talk_page.get(force = True, get_redirect = True)
     sections = textlib.extract_sections(talk_page.text, site)
     new_page_text = "".join(f"{sections.sections[i].title}{sections.sections[i].content}" for i in range(len(sections.sections)) if (i not in del_list) or (i in unarchived))
     text = sections.header + new_page_text
+    if counter_used:
+        text = mwparser.parse(text, skip_style_tags = True)
+        template = text.filter_templates(matches = work_template_name)
+        if template:
+            template = template[0]
+            old_template = str(template)
+            template.add("counter", str(new_counter), preserve_spacing = True)
+            text = str(text)
+            work_page = pywikibot.Page(site, work_page_name)
+            page_list = json.loads(work_page.text)
+            page_list[page.title()]["counter"] = new_counter
+        else:
+            work_page = pywikibot.Page(site, work_page_name)
+            page_list = json.loads(work_page.text)
+            if page.title() in page_list:
+                del page_list[page.title()]
+        text = json.dumps(page_list, ensure_ascii = False, indent = 4, sort_keys = True)
+        save(site, work_page, text, "Updated by Twelephant-bot")
     save(site, talk_page, text, f"Archived {len(del_list) - len(unarchived)} threads by Twelephant-bot")
-
-def update_counter(page_name:str, work_page_name:str, work_template_name:str, site, new_counter:int):
-    page = pywikibot.Page(site, page_name)
-    text = mwparser.parse(page.text, skip_style_tags = True)
-    template = text.filter_templates(matches = work_template_name)
-    if template:
-        template = template[0]
-        old_template = str(template)
-        template.add("counter", str(new_counter), preserve_spacing = True)
-        text = str(text)
-        save(site, page, text, "Updated by Twelephant-bot")
-        work_page = pywikibot.Page(site, work_page_name)
-        page_list = json.loads(work_page.text)
-        page_list[page.title()]["counter"] = new_counter
-    else:
-        work_page = pywikibot.Page(site, work_page_name)
-        page_list = json.loads(work_page.text)
-        if page.title() in page_list:
-            del page_list[page.title()]
-    text = json.dumps(page_list, ensure_ascii = False, indent = 4, sort_keys = True)
-    save(site, work_page, text, "Updated by Twelephant-bot")
 
 def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(counter)d", archive_time:[str, int|list] = ["old", 86400], counter:int = 1, minthreadsleft:int = 5, minthreadstoarchive:int = 2, \
                  archiveheader:str = "{{talkarchive}}", maxarchivesize:[str, int] = ["Bytes", 1000000000], custom_rules:list = [], work_page_name:str = "", work_template_name:str = "", **kwargs):
@@ -271,17 +264,9 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     if del_list != set() and len(del_list) >= minthreadstoarchive:
         if ("%(counter)d" in archive_page_name):
             unarchived = []
-            if date_used:
-                for i in archive_list.keys():
-                    achive_name = archive_page_name.replace("%(year)d", str(i[0])).replace("%(month)d", str(i[1])).replace("%(quarter)d", str(math.ceil(i[1] / 3)))
-                    unarchived.extend(archive(archive_page_name = achive_name, site = site, archive_list = archive_list[i], sections = sections, talk_page_name = page_name, \
-                            header = archiveheader, counter_used = True, counter = counter, maxarchivesize = maxarchivesize, work_page_name = work_page_name, \
-                                      work_template_name = work_template_name)[1])
-            else:
-                unarchived.extend(archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
-                        header = archiveheader, counter_used = True, counter = counter, maxarchivesize = maxarchivesize, work_page_name = work_page_name, \
-                                  work_template_name = work_template_name)[1])
-            del_archived(site, talk_page, del_list, unarchived)
+            unarchived.extend(archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
+                        header = archiveheader, counter_used = True, counter = counter, maxarchivesize = maxarchivesize)[1])
+            del_archived(site, talk_page, del_list, unarchived, True, counter)
 
         else:
             if date_used:
@@ -292,7 +277,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             else:
                 archive(archive_page_name = achive_page_name, site = site, archive_list = archive_list, sections = sections, talk_page_name = page_name, \
                         header = archiveheader, counter_used = False)
-            del_archived(site, talk_page, del_list, [])
+            del_archived(site, talk_page, del_list)
 
 def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = False)
