@@ -21,11 +21,11 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
     retry_times = 0
     e = None 
     if add and page.exists():
-        page.get(force = True, get_redirect = True)
+        oringinal_text = page.get(force = True, get_redirect = True)
     while retry_times < max_retry_times:
         try:
             if add and page.exists():
-                page.text += text
+                page.text = oringinal_text + text
             else:
                 page.text = text
             page.save(summary, minor = minor)
@@ -33,7 +33,7 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
         except pywikibot.exceptions.EditConflictError as e:
             print(f"Warning! There is an edit conflict on page '{page.title()}'!")
             retry_times += 1
-            page.get(force = True, get_redirect = True)
+            oringinal_text = page.get(force = True, get_redirect = True)
         except pywikibot.exceptions.LockedPageError as e:
             print(f"Warning! The edit attempt on page '{page.title()}' was disallowed because the page is protected!")
             break
