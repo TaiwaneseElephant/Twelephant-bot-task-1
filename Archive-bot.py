@@ -34,13 +34,13 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
             if not add:
                 page.get(force = True, get_redirect = True)
         except pywikibot.exceptions.LockedPageError as e:
-            print(f"Warining! The edit attempt on page '{page.title()}' was disallowed because the page is protected!")
+            print(f"Warning! The edit attempt on page '{page.title()}' was disallowed because the page is protected!")
             break
         except pywikibot.exceptions.AbuseFilterDisallowedError as e:
             print(f"Warining! The edit attempt on page '{page.title()}' was disallowed by the AbuseFilter!")
             break
         except pywikibot.exceptions.SpamblacklistError as e:
-            print(f"Warining! The edit attempt on page '{page.title()}' was disallowed by the SpamFilter because the edit add blacklisted URL!")
+            print(f"Warning! The edit attempt on page '{page.title()}' was disallowed by the SpamFilter because the edit add blacklisted URL!")
             break
         except pywikibot.exceptions.TitleblacklistError as e:
             print(f"Warining! The edit attempt on page '{page.title()}' was disallowed because the title is blacklisted!")
@@ -256,7 +256,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                             if calendar.timegm(time_then) > last_timestamp:
                                 last_time = time_then
             if not fail:
-                if date_used:
+                if date_used and last_time:
                     if (last_time.tm_year, last_time.tm_mon) in archive_list:
                         archive_list[(last_time.tm_year, last_time.tm_mon)].append(i)
                     else:
