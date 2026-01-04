@@ -132,7 +132,7 @@ def del_archived(site, talk_page, del_list:set, unarchived:list = [], counter_us
             text = str(text)
             work_page = pywikibot.Page(site, work_page_name)
             page_list = json.loads(work_page.text)
-            page_list[page.title()]["counter"] = new_counter
+            page_list[talk_page.title()]["counter"] = new_counter
         else:
             work_page = pywikibot.Page(site, work_page_name)
             page_list = json.loads(work_page.text)
