@@ -251,7 +251,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                                 break
                             if calendar.timegm(time_then) > last_timestamp:
                                 last_time = time_then
-                    elif custom_standard[0] == "w":
+                    elif archive_standard[0] == "w":
                        for j in signature_timestamp:
                             time_then = timestripper.timestripper(j).timetuple()
                             if (datetime.utcnow().isocalendar()[1] - datetime(*time_then[:6]).isocalendar()[1]) < custom_standard[1]:
@@ -295,7 +295,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                         header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list, archive_list[None])
         else:
-            archive(archive_page_name = achive_page_name, site = site, archive_list = archive_list[None], sections = sections, talk_page_name = page_name, \
+            archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[None], sections = sections, talk_page_name = page_name, \
                     header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list)
 
@@ -377,8 +377,6 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     work_page = pywikibot.Page(site, work_page_name)
     old_page_list = json.loads(work_page.text)
     if old_page_list != result:
-        print(old_page_list)
-        print(result)
         welcome_newcomers(result, old_page_list, site)
         text = json.dumps(result, ensure_ascii = False, indent = 4)
         save(site, work_page, text, "Updated by Twelephant-bot")
