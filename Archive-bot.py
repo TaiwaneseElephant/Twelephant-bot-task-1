@@ -158,7 +158,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     counter_used = ("%(counter)d" in archive_page_name) and not date_used
     archive_list = {}
     if not date_used:
-        archive[None] = []
+        archive_list[None] = []
 
     for i in range(threads_num):
         if len(del_list) == maxthreadstoarchive:
