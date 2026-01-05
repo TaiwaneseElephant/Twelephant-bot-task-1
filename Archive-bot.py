@@ -5,7 +5,7 @@ import mwparserfromhell as mwparser
 import re
 import time
 import calendar
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import math
 import copy
@@ -207,7 +207,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                             elif custom_standard[0] == "w":
                                for j in signature_timestamp:
                                     time_then = timestripper.timestripper(j).timetuple()
-                                    if (datetime.now(datetime.UTC).isocalendar()[1] - datetime(*time_then[:6]).isocalendar()[1]) < custom_standard[1]:
+                                    if (datetime.now(timezone.UTC).isocalendar()[1] - datetime(*time_then[:6]).isocalendar()[1]) < custom_standard[1]:
                                         fail = True
                                         break
                                     if calendar.timegm(time_then) > last_timestamp:
@@ -254,7 +254,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                     elif archive_standard[0] == "w":
                        for j in signature_timestamp:
                             time_then = timestripper.timestripper(j).timetuple()
-                            if (datetime.now(datetime.UTC).isocalendar()[1] - datetime(*time_then[:6]).isocalendar()[1]) < archive_standard[1]:
+                            if (datetime.now(timezone.UTC).isocalendar()[1] - datetime(*time_then[:6]).isocalendar()[1]) < archive_standard[1]:
                                 fail = True
                                 break
                             if calendar.timegm(time_then) > last_timestamp:
