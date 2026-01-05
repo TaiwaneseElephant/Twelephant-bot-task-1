@@ -60,28 +60,31 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
             max_sections_num = maxarchivesize[1] - len(textlib.extract_sections(archive_page.text, site).sections)
             if max_sections_num <= 0:
                 counter_num += 1
+            list_to_archive = archive_list
+            last_list = []
+            while True:
                 archive_page = pywikibot.Page(site, archive_page_name.replace("%(counter)d", str(counter_num)))
-            if max_sections_num < len(archive_list):
-                text = "".join(f"\n{sections.sections[i].title}{sections.sections[i].content}" for i in archive_list[:max_sections_num])
-                if  not archive_page.exists():
-                    text = f"{header}\n{text}"
-                saved = save(site, archive_page, text, f"Archived {min(max_sections_num, len(archive_list))} threads from [[{talk_page_name}]] by Twelephant-bot", \
-                             add = archive_page.exists())
-                new_counter, last_list = archive(archive_page_name, site, archive_list[max_sections_num:], sections, talk_page_name, header, \
-                                                 True, counter_num + 1, maxarchivesize, depth + 1)
-                if saved:
-                    return new_counter, last_list
+                if max_sections_num < len(archive_list):
+                    text = "".join(f"\n{sections.sections[i].title}{sections.sections[i].content}" for i in list_to_archive[:max_sections_num])
+                    if  not archive_page.exists():
+                        text = f"{header}\n{text}"
+                    saved = save(site, archive_page, text, f"Archived {min(max_sections_num, len(list_to_archive))} threads from [[{talk_page_name}]] by Twelephant-bot", \
+                                 add = archive_page.exists())
+                    new_counter, last_list = archive(archive_page_name, site, archive_list[max_sections_num:], sections, talk_page_name, header, \
+                                                     True, counter_num + 1, maxarchivesize, depth + 1)
+                    if not saved:
+                        last_list += archive_list[:max_sections_num]
+                    list_to_archive = archive_list[max_sections_num:]
+                    counter_num += 1
                 else:
-                    return new_counter, last_list + archive_list[:max_sections_num]
-            else:
-                text = "".join(f"\n{sections.sections[i].title}{sections.sections[i].content}" for i in archive_list)
-                if  not archive_page.exists():
-                    text = f"{header}\n{text}"
-                saved = save(site, archive_page, text, f"Archived {len(archive_list)} threads from [[{talk_page_name}]] by Twelephant-bot", add = archive_page.exists())
-                if saved:
-                    return counter_num, []
-                else:
-                    return counter_num, archive_list
+                    text = "".join(f"\n{sections.sections[i].title}{sections.sections[i].content}" for i in list_to_archive)
+                    if  not archive_page.exists():
+                        text = f"{header}\n{text}"
+                    saved = save(site, archive_page, text, f"Archived {len(archive_list)} threads from [[{talk_page_name}]] by Twelephant-bot", add = archive_page.exists())
+                    if saved:
+                        return counter_num, last_list
+                    else:
+                        return counter_num, last_list + list_to_archive
         elif maxarchivesize[0] == "Bytes":
             if  archive_page.exists():
                 text = archive_page.text
