@@ -356,10 +356,6 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
                     result[title]["custom_rules"].append([option_rules[key], "last", [var2, int(var1)]])
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
-        if "%(counter)d" not in result[title]["archive_page_name"]:
-            del result[title]["counter"], result[title]["maxarchivesize"]
-        if result[title]["custom_rules"] == []:
-            del result[title]["custom_rules"]
     work_page = pywikibot.Page(site, work_page_name)
     old_page_list = json.loads(work_page.text)
     if old_page_list != result:
