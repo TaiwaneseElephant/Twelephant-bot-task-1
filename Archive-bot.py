@@ -5,6 +5,7 @@ import mwparserfromhell as mwparser
 import re
 import time
 import calendar
+from datetime import datetime
 import json
 import math
 import copy
@@ -201,6 +202,14 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                                         break
                                     if calendar.timegm(time_then) > last_timestamp:
                                         last_time = time_then
+                            elif custom_standard[0] == "w":
+                               for j in signature_timestamp:
+                                    time_then = timestripper.timestripper(j).timetuple()
+                                    if (datetime.datetime.utcnow().isocalendar()[1] - datetime.datetime(*time_then[:6]).isocalendar()[1]) < custom_standard[1]:
+                                        fail = True
+                                        break
+                                    if calendar.timegm(time_then) > last_timestamp:
+                                        last_time = time_then
                             elif custom_standard[0] == "d":
                                 for j in signature_timestamp:
                                     time_then = timestripper.timestripper(j).timetuple()
@@ -236,6 +245,14 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                         for j in signature_timestamp:
                             time_then = timestripper.timestripper(j).timetuple()
                             if ((time.gmtime().tm_year - time_then.tm_year) * 12 + (time.gmtime().tm_mon - time_then.tm_mon)) < archive_standard[1]:
+                                fail = True
+                                break
+                            if calendar.timegm(time_then) > last_timestamp:
+                                last_time = time_then
+                    elif custom_standard[0] == "w":
+                       for j in signature_timestamp:
+                            time_then = timestripper.timestripper(j).timetuple()
+                            if (datetime.datetime.utcnow().isocalendar()[1] - datetime.datetime(*time_then[:6]).isocalendar()[1]) < custom_standard[1]:
                                 fail = True
                                 break
                             if calendar.timegm(time_then) > last_timestamp:
