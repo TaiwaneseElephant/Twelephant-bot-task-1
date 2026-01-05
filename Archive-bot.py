@@ -276,6 +276,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                 achive_name = archive_page_name.replace("%(year)d", str(i[0])).replace("%(month)d", str(i[1])).replace("%(quarter)d", str(math.ceil(i[1] / 3)))
                 archive(archive_page_name = achive_name, site = site, archive_list = archive_list[i], sections = sections, talk_page_name = page_name, \
                         header = archiveheader, counter_used = False)
+            del_archived(site, talk_page, del_list, archive_list[None])
         else:
             archive(archive_page_name = achive_page_name, site = site, archive_list = archive_list[None], sections = sections, talk_page_name = page_name, \
                     header = archiveheader, counter_used = False)
