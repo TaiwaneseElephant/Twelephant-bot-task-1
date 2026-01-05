@@ -53,7 +53,7 @@ def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_
             maxarchivesize:list = ["Bytes", 1000000000], depth:int = 0):
     if depth > 10:
         return counter, archive_list
-    archive_page = pywikibot.Page(site, archive_page_name.replace("%(counter)d", str(counter_num)))
+    archive_page = pywikibot.Page(site, archive_page_name.replace("%(counter)d", str(counter)))
     if counter_used:
         counter_num = counter
         if maxarchivesize[0] == "Threads":
