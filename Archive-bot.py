@@ -51,7 +51,7 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
 
 def archive(archive_page_name:str, site, archive_list:list, sections, talk_page_name:str, header:str, counter_used:bool = False, counter:int = 0, \
             maxarchivesize:list = ["Bytes", 1000000000], depth:int = 0):
-    if depth > 10:
+    if depth > 10 or not archive_list:
         return counter, archive_list
     archive_page = pywikibot.Page(site, archive_page_name.replace("%(counter)d", str(counter)))
     if counter_used:
