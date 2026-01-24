@@ -399,6 +399,15 @@ def check_switch(site, switch_page_name:str) -> bool:
     switch_page = pywikibot.Page(site, switch_page_name)
     return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
 
+def status(site, running:bool):
+    page = pywikibot.Page(site, "User:Twelephant-bot/status")
+    if running:
+        page.text = "{{工作中}}"
+        page.save("Working")
+    else:
+        page.text = "{{Later}}"
+        page.save("Sleeping")
+
 def run():
     print("Run!")
     site = pywikibot.Site('wikipedia:zh')
@@ -406,6 +415,7 @@ def run():
     work_template_name = "User:Twelephant-bot/Archive"
     if check_switch(site, "User:Twelephant-bot/setting.json"):
         print("Start!")
+        status(site, True)
         page_list = get_page_list(site, work_page_name, work_template_name)
         for page, pref in page_list.items():
             if check_switch(site, "User:Twelephant-bot/setting.json"):
@@ -415,6 +425,8 @@ def run():
                 except  Exception as e:
                     print(f"Skipped page '{page}', its prefercence is {pref}, and the error is '{e}'")
         print(f"Sleep for 600 seconds since{time.gmtime()}.")
+        status(site, False)
         time.sleep(600)
 
-run()
+if __name__ == "__main__":
+    run()
