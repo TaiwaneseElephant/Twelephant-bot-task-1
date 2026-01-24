@@ -400,11 +400,12 @@ def check_switch(site, switch_page_name:str) -> bool:
     return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
 
 def run():
+    print("Run!")
     site = pywikibot.Site('wikipedia:zh')
     work_page_name = "User:Twelephant-bot/Work page.json"
     work_template_name = "User:Twelephant-bot/Archive"
     if check_switch(site, "User:Twelephant-bot/setting.json"):
-        print("Welcome! Start!")
+        print("Start!")
         page_list = get_page_list(site, work_page_name, work_template_name)
         for page, pref in page_list.items():
             if check_switch(site, "User:Twelephant-bot/setting.json"):
