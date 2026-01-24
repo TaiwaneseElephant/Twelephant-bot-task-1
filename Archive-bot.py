@@ -427,6 +427,8 @@ def run():
         print(f"Sleep for 600 seconds since{time.gmtime()}.")
         status(site, False)
         time.sleep(600)
+    else:
+        status(site, False)
 
 if __name__ == "__main__":
     run()
