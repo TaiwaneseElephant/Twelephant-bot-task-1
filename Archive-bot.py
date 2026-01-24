@@ -159,7 +159,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     archive_standard = archive_time[1]
     date_used = ("%(year)d" in archive_page_name) or ("%(month)d" in archive_page_name) or ("%(quarter)d" in archive_page_name) 
     counter_used = ("%(counter)d" in archive_page_name) and not date_used
-    archive_list = {"" : []}
+    archive_list = {0 : {0 :　[]}}
 
     for i in range(threads_num):
         if len(del_list) == maxthreadstoarchive:
@@ -274,7 +274,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                     else:
                         archive_list[(last_time.tm_year, last_time.tm_mon)] = [i]
                 else:
-                    archive_list[""].append(i)
+                    archive_list[0][0].append(i)
                 del_list.add(i)
         else:
             continue
@@ -282,7 +282,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     if del_list != set() and len(del_list) >= minthreadstoarchive:
         if counter_used:
             unarchived = []
-            result = archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[""], sections = sections, talk_page_name = page_name, \
+            result = archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[0][0], sections = sections, talk_page_name = page_name, \
                             header = archiveheader, counter_used = True, counter = counter, maxarchivesize = maxarchivesize)
             unarchived.extend(result[1])
             new_counter = result[0]
@@ -295,7 +295,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                         header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list, archive_list[""])
         else:
-            archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[""], sections = sections, talk_page_name = page_name, \
+            archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[0][0], sections = sections, talk_page_name = page_name, \
                     header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list)
 
