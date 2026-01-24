@@ -424,7 +424,7 @@ def run():
                     print(page)
                 except  Exception as e:
                     print(f"Skipped page '{page}', its prefercence is {pref}, and the error is '{e}'")
-        print(f"Sleep for 600 seconds since{time.gmtime()}.")
+        print(f"Sleep for 600 seconds since {time.asctime(time.gmtime())}.")
         status(site, False)
         time.sleep(600)
     else:
