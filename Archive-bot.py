@@ -280,6 +280,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             continue
 
     if del_list != set() and len(del_list) >= minthreadstoarchive:
+        status(site, True)
         if counter_used:
             unarchived = []
             result = archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[(0, 0)], sections = sections, talk_page_name = page_name, \
@@ -427,8 +428,6 @@ def run():
         print(f"Sleep for 600 seconds since {time.asctime(time.gmtime())}.")
         status(site, False)
         time.sleep(600)
-    else:
-        status(site, False)
 
 if __name__ == "__main__":
     run()
