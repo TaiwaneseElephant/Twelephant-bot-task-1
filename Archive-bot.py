@@ -174,8 +174,9 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             last_time = None
             custom_rules_used  = False
             fail = False
-            if custom_rules != []:
-                for rule, custom_time_type, custom_standard in custom_rules:
+            if custom_rules != {}:
+                for rule_name, value in custom_rules:
+                    rule, custom_time_type, custom_standard = value
                     if re.match(rule, title):
                         if custom_time_type == "old":
                             for j in signature_timestamp:
@@ -304,7 +305,7 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = True)
     result = {}
     default = {"archive_page_name":"%(page)s/存檔%(counter)d", "archive_time" : ["old", 86400], "counter" : 1, "maxarchivesize" : ["Bytes", 1000000000], \
-               "minthreadsleft" : 5, "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : []}
+               "minthreadsleft" : 5, "minthreadstoarchive" : 2, "archiveheader" : "{{talkarchive}}", "custom_rules" : {}}
     option_rules = {"afd" : r".*?页面存废讨论通知", "csd" : r".*?的快速删除通知", "ifd" : r".*?-\{zh-hans:文件;zh-hant:檔案;\}-存廢討論通知", \
                     "mentor" : r"== 来自.*?的问题 （\d{4}年\d{1,2}月\d{1,2}日 ([一二三四五六日) \d{2}:\d{2}） ==",\
                     "nolicense" : r"(?:.*?的著作權問題)|(?:.*?的檔案授權許可問題)|(?:.*?的檔案來源與著作權標籤問題)", \
@@ -354,15 +355,16 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
                     result[title]["maxarchivesize"] = [var1[item[-1]], (num * var2[item[-1]])]
             elif key == "archiveheader":
                 result[title]["archiveheader"] = item
-            elif key.startswith("custom"):
+            elif (var := re.match("custom_(.*?)", key)):
+                rule_name = f"custom:{var.groups()[0]}"
                 var = re.match(r"(.*?);(old|last)\s*\(\s*(\d+)\s*([ymwdh])\s*\)$", item)
                 if var:
                     var1, var2, var3, var4 = var.groups()
                     if var2 == "old" and var4 in ("w", "d", "h"):
                         var = {"w":604800, "d":86400, "h":3600}
-                        result[title]["custom_rules"].append([var1, "old", int(var3) * var[var4]])
+                        result[title]["custom_rules"][rule_name] = [var1, "old", int(var3) * var[var4]]
                     elif var2 == "last" and var4 in ("y", "m", "d"):
-                        result[title]["custom_rules"].append([var1, "last", [var4, int(var3)]])
+                        result[title]["custom_rules"][rule_name] = [var1, "last", [var4, int(var3)]]
             elif key in option_rules:
                 item = item.replace(" ", "").lower()
                 match1 = re.match(r"old\((\d+)([wdh])\)", item)
@@ -370,10 +372,10 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
                 if match1:
                     var = {"w":604800, "d":86400, "h":3600}
                     var1, var2 = match1.groups()
-                    result[title]["custom_rules"].append([option_rules[key], "old", int(var1) * var[var2]])
+                    result[title]["custom_rules"][key] = [option_rules[key], "old", int(var1) * var[var2]]
                 elif match2:
                     var1, var2 = match2.groups()
-                    result[title]["custom_rules"].append([option_rules[key], "last", [var2, int(var1)]])
+                    result[title]["custom_rules"][key] = [option_rules[key], "last", [var2, int(var1)]]
         result[title]["archive_page_name"] = result[title]["archive_page_name"].replace("%(page)s", title)
         result[title]["archiveheader"] = result[title]["archiveheader"].replace("%(page)s", title)
     work_page = pywikibot.Page(site, work_page_name)
