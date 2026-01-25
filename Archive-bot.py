@@ -416,7 +416,6 @@ def run():
     work_template_name = "User:Twelephant-bot/Archive"
     if check_switch(site, "User:Twelephant-bot/setting.json"):
         print("Start!")
-        status(site, True)
         page_list = get_page_list(site, work_page_name, work_template_name)
         for page, pref in page_list.items():
             if check_switch(site, "User:Twelephant-bot/setting.json"):
