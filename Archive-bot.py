@@ -175,7 +175,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             custom_rules_used  = False
             fail = False
             if custom_rules != {}:
-                for rule_name, value in custom_rules:
+                for rule_name, value in custom_rules.items():
                     rule, custom_time_type, custom_standard = value
                     if re.match(rule, title):
                         if custom_time_type == "old":
