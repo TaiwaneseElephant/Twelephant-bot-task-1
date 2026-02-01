@@ -222,6 +222,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                                     if calendar.timegm(time_then) > last_timestamp:
                                         last_time = time_then
                         custom_rules_used  = True
+                        print(title)
                         break
             if not custom_rules_used:
                 fail = False
