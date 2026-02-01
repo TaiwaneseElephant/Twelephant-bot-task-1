@@ -18,7 +18,7 @@ TIME_STAMP_PATTERN = re.compile(r"\d{4}年\d{1,2}月\d{1,2}日 \([一二三四�
 def find_signature_timestamp(text:str) -> list:
     return [i.group() for i in TIME_STAMP_PATTERN.finditer(text)]
 
-def save(site, page:str, text:str, summary:str = "", add = False, minor = True, max_retry_times = 3):
+def save(site, page, text:str, summary:str = "", add:bool = False, minor:bool = True, max_retry_times:int = 3):
     e = None
     oringinal_text = ""
     if add and page.exists():
@@ -26,7 +26,7 @@ def save(site, page:str, text:str, summary:str = "", add = False, minor = True, 
     for _ in range(max_retry_times):
         try:
             if add and page.exists():
-                page.text = oringinal_text + text
+                page.text = textlib.add_text(oringinal_text, text, site = site)
             else:
                 page.text = text
             page.save(summary, minor = minor)
@@ -400,8 +400,11 @@ def welcome_newcomers(new_page_list:dict, old_page_list:dict, site):
             send_welcome_message(i, site)
 
 def check_switch(site, switch_page_name:str) -> bool:
-    switch_page = pywikibot.Page(site, switch_page_name)
-    return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
+    try:
+        switch_page = pywikibot.Page(site, switch_page_name)
+        return json.loads(switch_page.text)["Archive User talk page"]["Enable"]
+    except:
+        return False
 
 def status(site, running:bool):
     page = pywikibot.Page(site, "User:Twelephant-bot/status")
