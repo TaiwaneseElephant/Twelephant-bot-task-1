@@ -177,7 +177,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             if custom_rules != {}:
                 for rule_name, value in custom_rules.items():
                     rule, custom_time_type, custom_standard = value
-                    print(value)
+                    print(value, flush = True)
                     if re.match(rule, title):
                         if custom_time_type == "old":
                             for j in signature_timestamp:
