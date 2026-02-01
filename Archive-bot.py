@@ -169,7 +169,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             continue
         if (signature_timestamp := find_signature_timestamp(content)):
             title = sections.sections[i].title.strip().strip("==").strip()
-            print(title)
+            print(title, flush = True)
             last_timestamp = 0
             last_time = None
             custom_rules_used  = False
@@ -177,7 +177,6 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             if custom_rules != {}:
                 for rule_name, value in custom_rules.items():
                     rule, custom_time_type, custom_standard = value
-                    print(value, flush = True)
                     if re.match(rule, title):
                         if custom_time_type == "old":
                             for j in signature_timestamp:
@@ -223,7 +222,6 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                                     if calendar.timegm(time_then) > last_timestamp:
                                         last_time = time_then
                         custom_rules_used  = True
-                        print(title)
                         break
             if not custom_rules_used:
                 fail = False
@@ -302,6 +300,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[(0, 0)], sections = sections, talk_page_name = page_name, \
                     header = archiveheader, counter_used = False)
             del_archived(site, talk_page, del_list)
+        print(f"Archived '{title}'", flush = True)
 
 def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
     page_list = pywikibot.Page(site, work_template_name).getReferences(follow_redirects = False, only_template_inclusion = True, namespaces = 3, content = True)
