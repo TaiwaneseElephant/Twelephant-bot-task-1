@@ -163,7 +163,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
 
     new_sections = [sections.header]
     for i in range(threads_num):
-        if not re.match("==(?:(?!=)?.*?)?==", sections.sections[i].title.strip()):
+        if not re.match("==(?:(?!=).*?)?==", sections.sections[i].title.strip()):
             new_sections[-1].content = f"{new_sections[-1].content}\n{sections.sections[i].title}\n{sections.sections[i].content}"
         else:
             new_sections.append(i)
