@@ -161,15 +161,17 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     counter_used = ("%(counter)d" in archive_page_name) and not date_used
     archive_list = {(0, 0) : []}
 
-    new_sections = [sections.header]
+    new_sections = []
     for i in range(threads_num):
         if not re.match("==(?:(?!=).*?)?==", sections.sections[i].title.strip()):
-            new_sections[-1].content = f"{new_sections[-1].content}\n{sections.sections[i].title}\n{sections.sections[i].content}"
+            if new_sections = []:
+                sections.header = f"{sections.header}\n{sections.sections[i].title}\n{sections.sections[i].content}"
+            else:
+                new_sections[-1].content = f"{new_sections[-1].content}\n{sections.sections[i].title}\n{sections.sections[i].content}"
         else:
             new_sections.append(i)
-    threads_num = len(new_sections - 1)
-    sections.sections = new_sections[1:]
-    sections.header = new_sections[0]
+    threads_num = len(new_sections)
+    sections.sections = new_sections
 
     for i in range(threads_num):
         if len(del_list) == maxthreadstoarchive:
