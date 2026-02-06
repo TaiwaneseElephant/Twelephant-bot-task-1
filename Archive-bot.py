@@ -163,13 +163,14 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
 
     new_sections = []
     for i in range(threads_num):
-        if not sections.sections[i].level == 2:
+        if sections.sections[i].level == 2:
+            new_sections.append(i)
+        else:
             if new_sections == []:
                 sections.header = f"{sections.header}\n{sections.sections[i].title}\n{sections.sections[i].content}"
             else:
                 new_sections[-1].content = f"{new_sections[-1].content}\n{sections.sections[i].title}\n{sections.sections[i].content}"
-        else:
-            new_sections.append(i)
+            
     threads_num = len(new_sections)
     sections.sections = new_sections
 
