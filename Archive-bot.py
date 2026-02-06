@@ -165,9 +165,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
 
     new_sections = []
     for i in range(threads_num):
-        if sections.sections[i].level == 2:
-            new_sections.append(i.content)
-        else:
+        if sections.sections[i].level != 2:
             del_sections.append(i)
             j = i
             while j in del_sections:
