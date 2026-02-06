@@ -163,7 +163,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     counter_used = ("%(counter)d" in archive_page_name) and not date_used
     archive_list = {(0, 0) : []}
 
-    new_sections = []
+    del_sections = []
     for i in range(threads_num):
         if sections.sections[i].level != 2:
             del_sections.append(i)
@@ -177,6 +177,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
     for i in del_sections:
         del sections.sections[i]
     threads_num = len(sections.sections)
+    del del_sections
 
     for i in range(threads_num):
         if len(del_list) == maxthreadstoarchive:
