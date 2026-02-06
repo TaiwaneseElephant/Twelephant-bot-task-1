@@ -371,7 +371,7 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
                     result[title]["maxarchivesize"] = [var1[item[-1]], (num * var2[item[-1]])]
             elif key == "archiveheader":
                 result[title]["archiveheader"] = item
-            elif (var := re.match("custom_(.*?)", key)):
+            elif (var := re.match("custom_(.*)", key)):
                 rule_name = f"custom:{var.groups()[0]}"
                 var = re.match(r"(.*?);(old|last)\s*\(\s*(\d+)\s*([ymwdh])\s*\)$", item)
                 if var:
