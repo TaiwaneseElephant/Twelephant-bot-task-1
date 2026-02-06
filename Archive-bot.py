@@ -172,9 +172,11 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
                 sections.header = f"{sections.header}\n{sections.sections[i].title}\n{sections.sections[i].content}"
             else:
                 new_sections[-1].content = f"{new_sections[-1].content}\n{sections.sections[i].title}\n{sections.sections[i].content}"
-            
+    for i in range(len(new_sections)):
+        sections.sections[i] = new_sections[i]
+    for i in range(len(new_sections), threads_num):
+        del sections.sections[i]
     threads_num = len(new_sections)
-    sections.sections = new_sections
 
     for i in range(threads_num):
         if len(del_list) == maxthreadstoarchive:
