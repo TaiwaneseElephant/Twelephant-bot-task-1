@@ -18,7 +18,9 @@ TIME_STAMP_PATTERN = re.compile(r"\d{4}年\d{1,2}月\d{1,2}日 \([一二三四�
 def find_signature_timestamp(text:str) -> list:
     return [i.group() for i in TIME_STAMP_PATTERN.finditer(text)]
 
-def save(site, page, text:str, summary:str = "", add:bool = False, minor:bool = True, max_retry_times:int = 3):
+def save(site, page, text:str, summary:str = "", add:bool = False, minor:bool = True, max_retry_times:int = 3) -> bool:
+    if not page.botMayEdit():
+        return False
     e = None
     oringinal_text = ""
     if add and page.exists():
@@ -400,7 +402,7 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
         save(site, work_page, text, "Updated by Twelephant-bot")
     return result
 
-def send_message(site, talk_page_name:str, message:str, summary:str):
+def send_message(site, talk_page_name:str, message:str, summary:str = "message send by twelephant-bot"):
     talk_page = pywikibot.Page(site, talk_page_name)
     save(site, talk_page, message, summary, add = True, minor = False)
 
