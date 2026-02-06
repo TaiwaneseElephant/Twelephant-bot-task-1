@@ -173,7 +173,7 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             while j in del_sections:
                 j -= 1
             if j >= 0:
-                sections.sections[j].content = f"{sections.sections[j].content}\n{sections.sections[i].title}\n{sections.sections[i].content}"\
+                sections.sections[j].content = f"{sections.sections[j].content}\n{sections.sections[i].title}\n{sections.sections[i].content}"
             else:
                 sections.header = f"{sections.header}\n{sections.sections[i].title}\n{sections.sections[i].content}"
     for i in del_sections:
