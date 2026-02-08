@@ -430,7 +430,7 @@ def status(site, running:bool):
     if running and page.text != "{{工作中}}":
         page.text = "{{工作中}}"
         page.save("Working")
-    elif page.text != "休息中":
+    elif not running and page.text != "休息中":
         page.text = "休息中"
         page.save("Sleeping")
 
