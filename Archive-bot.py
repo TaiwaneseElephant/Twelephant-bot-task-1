@@ -331,7 +331,7 @@ def get_page_list(site, work_page_name:str, work_template_name:str) -> dict:
                     "nosource" : r"(?:.*?的來源問題)|(?:.*?的檔案來源與著作權標籤問題)", "norationale" : r".*?缺乏合理使用依據通知", \
                     "orfud" : r"未被条目使用的非自由版权图片.*?", "replaceable" : r"可被替代的非自由檔案.*?快速刪除通知", "rfc" : r"\d{4}年\d{1,2}月徵求意見討論邀請"}
     for i in page_list:
-        if not i.botMayEdit():
+        if i.site != site or not i.botMayEdit():
             continue 
         text = mwparser.parse(i.text, skip_style_tags = True)
         if not (match := text.filter_templates(matches = work_template_name)):
