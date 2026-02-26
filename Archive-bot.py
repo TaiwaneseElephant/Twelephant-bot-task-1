@@ -48,6 +48,8 @@ def save(site, page, text:str, summary:str = "", add:bool = False, minor:bool = 
         except pywikibot.exceptions.TitleblacklistError as e:
             print(f"Warning! The edit attempt on page '{page.title()}' was disallowed because the title is blacklisted!")
             break
+        except Exceptions as e:
+            break
     print(f"The attempt to edit the page '{page.title()}' was stopped because of the error below:\n{e}\nThe edit is '{text[:100]}', and the summary is '{summary}'.")
     return False
 
