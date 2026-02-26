@@ -301,7 +301,6 @@ def archive_page(page_name:str, site, archive_page_name:str = "%(page)s/存檔%(
             continue
 
     if del_list != set() and len(del_list) >= minthreadstoarchive:
-        status(site, True)
         if counter_used:
             unarchived = []
             result = archive(archive_page_name = archive_page_name, site = site, archive_list = archive_list[(0, 0)], sections = sections, talk_page_name = page_name, \
@@ -427,15 +426,6 @@ def check_switch(site, switch_page_name:str) -> bool:
     except:
         return False
 
-def status(site, running:bool):
-    page = pywikibot.Page(site, "User:Twelephant-bot/status")
-    if running and page.text != "{{工作中}}":
-        page.text = "{{工作中}}"
-        page.save("Working")
-    elif not running and page.text != "休息中":
-        page.text = "休息中"
-        page.save("Sleeping")
-
 def run():
     print("Run!")
     site = pywikibot.Site('wikipedia:zh')
@@ -452,7 +442,6 @@ def run():
                 except  Exception as e:
                     print(f"Skipped page '{page}', its prefercence is {pref}, and the error is '{e}'")
         print(f"Sleep for 600 seconds since {time.asctime(time.gmtime())}.", flush = True)
-        status(site, False)
         time.sleep(600)
 
 if __name__ == "__main__":
